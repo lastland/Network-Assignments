@@ -1,0 +1,67 @@
+Author:
+Li Yao (student id: 5090379133)
+
+Turnin List:
+rdt_sender.cc
+rdt_receiver.cc
+rdt_utility.h
+rdt_utility.cc
+makefile
+README
+
+Description:
+This RDT protocol is implemented in Go-Back-N method.
+
+Implementation:
+The main NFS callback functions are implemented in rdt_sender.cc and
+rdt_receiver.cc. And the basic macros and procedures used in this RDT program
+are written in rdt_utility.h and rdt_utility.cc.
+This is how I use the 128 Bytes packet for this Go-Back-N RDT protocol:
+Size of data (in byte) for the 1st byte, sequence number for the following 4
+bytes, data from messages for the following 121 bytes, and checksum value for
+the last 2 bytes.
+Thanks to the great ideas of inventing such things like macros, I can write a
+program which can implement a checksum value from 1 byte to 61 bytes with only
+one number edit in the rdt_utility.h file. I've tested many available lengths
+for the checksum value and found 2 bytes the best one. The window size and
+timeout value can also be easily changed with only one number edit each in the
+rdt_utility.h. I've tested them though and choosen the value of 6 and 0.3. You
+can get my testing reports below.
+
+Test:
+This program has been tested on my Linux machine.
+I've tested my program with following settings:
+	test-id		checksum-length	window-size	time-out
+	0		32		10		0.3
+	1		16		10		0.3
+	2		8		10		0.3
+	3		4		10		0.3
+	4		2		10		0.3
+	5		1		10		0.3
+	6		2		8		0.3
+	7		2		6		0.3
+	8		2		4		0.3
+
+There are two things I cared about during my testing: average number of
+characters per packet(I'll use NCPP for short), and average time. The results
+during a test of "./rdt-sim 1000 0.1 100 0.5 0.5 0.5 0" are:
+	test-id		NCPP		time
+	0		7.16		44599.73
+	1		7.93		39779.24
+	2		8.06		38609.28
+	3		8.18		37621.45
+	4		8.14		37912.04
+	5		8.26		37988.82
+	6		8.57		37638.12
+	7		8.86		37570.74
+	8		9.3		37812.26
+
+Note that test-id 5 has a better results than test-id 4, but always worse when
+the testcase is like "./rdt-sim 1000 0.1 100 0.02 0.02 0.02 0" or "./rdt-sim
+1000 0.1 100 0.2 0.2 0.2 0". (test-id 4 has an NCPP of 26.48 and 13.51 when the
+rate is 0.2 and 0.02 while test-id 5 has that of 26.32 and 13.62)
+It seems test-id 8 has the best NCPP (of course a smaller window size would
+benifits in this area) but test-id 7 got the shortest time. So I used the
+settings of test-id 7 in my program.
+And the results of my settings running in the rate 0.02 is about 28.09
+characters per packet on average.

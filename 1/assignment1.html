@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+	<link rel="stylesheet" type="text/css" href="/~jzhou/style.css" />
+  </head>
+ 
+<body>
+<h1> Assignment #1</h1>
+ 
+    <p>
+      <b><span class="emph">Due on Oct. 5, 2011 at 23:59:59</span></b>
+    </p>
+
+<h2>Part 1</h2>
+
+<ol>
+	<li>Consider sending real-time voice from Host A to Host B over a packet-switched
+	network (VoIP). Host A converts analog voice to a digital 64kbps bit stream on the
+	fly. Host A then groups the bits into 56-byte packets. There is only one link between
+	Host A and B; its transmission rate is 500 kbps and its propagation delay is 2 msec.
+	As soon as Host A gather a packet, it sends it to Host B. As soon as Host B receives
+	an entire packet, it converts the packet's bits into an analog signal. How much time
+	elapses from the time a bit is created (from the original analog signal at Host A)
+	until the bit is decoded (as part of the analog signal at Host B)? </li>
+
+	<li>Suppose users share a 1 Mbps link. Also suppose each user require 100 kbps when
+	transmitting, but each user transmits only 10 percent of the time (statistical
+			multiplexiing)
+	<ol type="a">
+		<li>When circuit switching is used, how many users can be supported? </li>
+		<li>For the remainder of this problem, suppose packet switching is used. Find the
+		probability that a given user is transmitting.</li>
+		<li>Suppose there are 40 users. Find the probability that at any given time,
+		exactly <i>n</i> users are transmitting simultaneously. (Hint: use the binomial
+				distribution.) </li>
+		<li>Find the probability that there are 11 or more users transmitting simultaneously. </li>
+	</ol> </li>
+
+	<li>Perform a Traceroute between source and destination on the same continent at three
+	different hours of the day.
+	<ol type="a">
+		<li>Find the average and standard deviation of the round-trip delays at each of the
+		three hours (e.g., 10 repeated experiments).
+		<li>Find the number of routers in the path at each of the three hours. Did the paths
+	   	change during any of the hours?
+		<li>Try to identify the number of ISP networks that the Traceroute packets pass
+		through from source to destination. Routers with similare names and/or similar IP
+		addresses should be considered as part of the same ISP. In your experiments, do the
+		largest delays occur at the peering interfaces between adjacent ISPs?
+		<li>Repeat the above for a source and destination on different continents.
+		Compare the intra-continent and inter-continent results.
+	</ol> </li>
+
+	<li>Compare and contrast WiFi wireless Internet access and 3G wireless Internet access.
+	What are the bit rates of the two services? What are the costs? Discuss roaming and
+	access ubiquity. </li>
+
+	<li>Try to identify at least 3 applications that use plaint text password/identification method.
+	    Use Wireshark to capture the plaint text password and write a report to describe how and where
+		you found the passwords. You need to turnin packet dumps for this problem.  </li>
+</ol>
+
+
+<h2>Part 2: Network Commands Exercise</h2>
+
+In this assignment, you will explore the various tools that an end user
+can use to discover how a machine is connected to the network and what
+the network looks like beyond the first hop.  You investigation
+will use the following six tools:
+
+<ol>
+  <li> ifconfig
+  </li>
+  <li> arp
+  </li>
+  <li> traceroute
+  </li>
+  <li> netstat
+  </li>
+  <li> nslookup
+  </li>
+  <li> whois
+  </li>
+</ol>
+
+
+<h3> Assignment Details</h3>
+
+
+All of these tools should be available on any machine running a UNIX-based
+operating system, i.e., the testbed.  However, unlike the other
+assignments, you can do this assignment from any machine that has all
+of these commands available.
+<p>
+
+You will want to make extensive use of the <i>man pages</i> for 
+each command.</p>
+<h4>1. ifconfig</h4>
+
+
+<ol>
+  <li> Run ``ifconfig -a'' on the machine you will be using.  Capture the
+output, and identify and explain as much of what is printed as you can.
+NOTE:  You should be able to understand almost all of it.</li>
+  
+</ol>
+
+
+<h4>2. ARP</h4>
+
+
+<ol>
+  <li> How do you show the full ARP table for your machine?  Capture 
+a printout of what it is.  Explain each column of what is printed.<br>
+  </li>
+  <li> If you try and use the <i>arp</i> command to add or delete an entry to the 
+ARP table what happens? Why do you suppose this is the case?<br>
+  </li>
+  <li> You still have the ability to modify the ARP table, just not directly.
+How can you affect (either add, delete, or change) entries in the ARP table? 
+Use this mechanism to add at least two new hosts to the ARP table and include 
+a printout.<br>
+  </li>
+  <li> How long do entries stay cached in the ARP table?  Describe a
+trial-and-error method to discover the timeout value.<br>
+  </li>
+  <li> What will happen if two IP addresses map to the same Ethernet address?
+Be specific on how all hosts on the subnet operate.</li>
+</ol>
+
+
+<h4>3. traceroute</h4>
+
+
+<ol>
+  <!-- <li> Explain in detail how <i>traceroute</i> works.<br> </li> -->
+
+  <li> Perform a <i>traceroute</i> from your machine to <i>tourism.at.ru</i>. Include a copy
+of the output and explain what happened including a description of what
+each of the fields means.<br>
+  </li>
+  <li> Here's the challenge for this question:  we want to traceroute to a 
+non-existant machine outside SJTU.  The first problem is how do we KNOW that a particular machine does
+not exist?  If we just pick an IP address and <i>ping</i> it, why is that
+not sufficient?<br>
+  </li>
+  <li> Determine an IP address for a machine that you know definitely does not exist.
+Do a traceroute to that machine.  Include a copy of the result.<br>
+  </li>
+  <li> Identify a completely different (in all octets) IP address for a non-existant
+machine.  Do a traceroute to this machine.  Include a copy of this result.</li>
+  <li> Repeat the above exercise (but you don't have to include traceroutes to
+more than two machines in your writeup) enough times so you can detect a 
+pattern about what is happening.  What pattern exists and why?
+
+  </li>
+</ol>
+
+
+<h4>4. netstat</h4>
+
+
+<ol>
+  <li> What is <i>netstat</i> and what is it used for?<br>
+  </li>
+  <li> What parameters for <i>netstat</i> should you use to show all the TCP 
+connections established? Include a printout of this list for your machine.
+Be sure to explain what all fields are.<br>
+  </li>
+  <li> What does <i>netstat -r</i> show? What are each of the fields in this
+output?<br>
+  </li>
+  <li> <i>netstat</i> can be used to display network interface status. What option
+of <i>netstat</i> does this? By using <i>netstat</i>, figure out the number of interfaces
+on your machine.  In the output you will find an interface named <i>lo0</i>
+as a loopback interface. Can you say anything about this interface, about
+its function?</li>
+</ol>
+
+
+<h4>5. nslookup</h4>
+
+
+<ol>
+  <li> What is the IP address for the machine kubi.cs.berkeley.edu?<br>
+  </li>
+  <li> What <i>local</i> machine is this information coming from? Why is 
+it coming from this machine?<br>
+  </li>
+  <li> Here is the problem: I want to find the IP address of where my email 
+to somebody@hotmail.com goes. What you really need to do is find the 
+``mail exchanger''
+for hotmail.com. There is an option in nslookup that tells you what the mail
+exchanger is for hotmail.com. Figure out the exact syntax of the format of
+this command, and execute it. Now what is the IP address of where my email
+to hotmail goes?</li>
+</ol>
+
+
+<h4>6. whois</h4>
+
+
+<ul>
+  <b>HINT:</b> You will need to use a different server than the default
+whois server. One to try is: whois.arin.net.
+  <p>
+
+  <b>HINT:</b>  Getting whois.arin.net to return information is a challenge.
+Make sure you try all combinations of the network name, the host address,
+and the network address.</p>
+  <p>
+
+  <b>HINT:</b>  You can also do a domain search at someplace like
+http://www.networksolutions.com/.</p>
+</ul>
+
+
+<ol>
+  <li> Who is the ``coordinator'' for the network on which www.sjtu.edu.cn resides?<br>
+  </li>
+  <li> Who is the coordinator for the network that kubi.cs.berkeley.edu is on?<br>
+  </li>
+  <li> Like the hotmail example, I have another friend I send email to at AOL.
+Her email address is something@aol.com.  What can you say about
+the coordinator for the AOL email network, i.e. contact info, etc?
+Include information about the steps you took and the
+results of the queries you made to figure out this information.<br>
+  </li>
+  <li> What machine has IP address 198.182.196.56?   What machines act
+as the DNS nameserver for the domain that 198.182.196.56 is in?</li>
+</ol>
+
+
+<h3>Turn-in:</h3>
+
+Your answers to the above questions should be included in <code>report.pdf</code>.
+Traffice dumps should be named <code>dump[123].pcap</code>. Assuming all these
+four files are in your current directory, then run:
+
+<pre>
+	$ turnin assignment1@network report.pdf dump1.pcap dump2.pcap dump3.pcap
+</pre>
+
+
+</body>
+</html>

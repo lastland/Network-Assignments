@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+ <html>
+  <head>
+	<link rel="stylesheet" type="text/css" href="/~jzhou/style.css" />
+  </head>
+ 
+  <body>
+<h2> Assignment #2 - Implementing the Destination Sequenced Distance Vector (DSDV) Routing Protocol</h2>
+ 
+    <p>
+      <b><span class="emph">Due by 11:59pm, Nov. 12, 2011.</span></b>
+    </p>
+
+<p><strong>Note:</strong> the link cost change can be either a positive number or
+a negative one. E.g., the cost between A-B can be changed from 2.0 to 4.0,
+or changed from 2.0 to -1. A negative one such as -1 means that the link is broken/down.
+</p>
+
+
+<h3>Assignment requirements:</h3>
+    <p>
+      In this assignment you are asked to implement the destination sequenced distance vector (DSDV) routing
+      protocol discussed in class.  Your program will be running at the provided Linux testbed. 
+      At each host, the input to your program is the set of directly 
+      attached links and their costs.  <span class="emph">Note that the program 
+      at each host doesn't know the complete network topology.</span>  Your 
+      routing program at each host should report the cost and the next hop for 
+      the shortest paths to all other hosts in the network.  This is an individual 
+      assignment, so each person should turn in his/her own program.
+    </p>
+ 
+    <p>
+      In DSDV, each host sends out the routing information to its 
+      neighbors at a certain frequency (e.g., once every 10 seconds), no matter if the
+      information has changed since the last announcement.  This strategy improves the 
+      robustness of the protocol.  For instance, a lost message will be 
+      automatically recovered by later messages.  In this strategy, typically a host
+      re-computes its distance vector and routing table right before sending out the 
+      routing information to its neighbors.
+    </p>
+
+    <p>
+      Since we don't have real network routers for you to play with, your programs will 
+      run on machines in the testbed.  As specified in the
+      distance vector protocols, your routing program at each host will exchange
+      the routing information with directly connected neighbors.  Real routing 
+      protocols use UDP for such exchanges.  Under such a scheme, each host 
+      should listen at a UDP port for incoming routing messages.
+    </p>
+
+<h4>Input format:</h4>
+    <p>
+      Your program at host <code>n1</code> should take a text file as input, 
+      which describes the set of directly attached links and their costs.  The 
+      first line of the text file is a single number and a string, where the number 
+      specify the total number of directly attached links and the string specify
+	  the name of current node.  <span class="strong">All subsequent lines in the input file are in 
+      the format of "<CODE>n2 machine cost port_number</CODE>", which stands for a link between node 
+      <code>n1</code> and node <code>n2</code> with cost <CODE>cost</CODE>, and the program
+	  of node <code>n2</code> actually is running on <code>machine</code> and listening at port <code>port_number</code>.  Note 
+      that <CODE>cost</CODE> is a floating point number.  The four fields are
+      separated by spaces in each line of the input file.</span> 
+    </p>
+ 
+    <p>
+      Let's look at an example with the network topology shown in the following figure.
+      <center><img src="network.jpg"></center> 
+      The input files at all hosts will look like the following:
+      <a href="a.dat">a.dat</a>, <a href="b.dat">b.dat</a>, <a href="c.dat">c.dat</a>,
+      <a href="d.dat">d.dat</a>, <a href="e.dat">e.dat</a>, and <a href="f.dat">f.dat</a>.
+      Note that in the above example, <code>a</code>, <code>b</code>, <code>c</code>,
+	  <code>d</code>, <code>e</code>, and <code>f</code> stand for 
+      real machine <code>head</code>, <code>node1</code>, and 
+      <code>node2</code>, <code>node3</code>, <code>node4</code>, and <code>head</code>
+	  in the testbed, respectively. <code>a</code> and <code>f</code> will use different 
+	  UDP port numbers.
+    </p>
+
+    <p>
+      Be aware that we will use DIFFERENT network topologies in our testing.
+    </p>
+
+<h4>Output format:</h4>
+    <p>
+      Your program should produce a terminal output each time it sends out the 
+      routing information to its neighbors (<i>i.e.</i>, once every 10 seconds).
+      Each such output should include an incremental print-out number (1 for the
+      first output, 2 for the second output, etc.).  Each output should also
+      include the cost and the next hop for the shortest paths to all other 
+      network nodes.  For instance, one of the terminal outputs at node 
+      <code>a</code> may look like the following.
+      <pre>
+ ## print-out number 10
+ shortest path to node b (seq# 10): the next hop is b and the cost is 2.0
+ shortest path to node c (seq# 12): the next hop is d and the cost is 3.0
+ shortest path to node d (seq# 10): the next hop is d and the cost is 1.0
+ shortest path to node e (seq# 12): the next hop is d and the cost is 2.0
+ shortest path to node f (seq# 8): the next hop is d and the cost is 4.0
+      </pre>
+	  In the above, "node b (seq# 10)" means the sequence number from node b is 10.
+      You must produce the terminal output from the first time the host sends 
+      out its routing information to its neighbors.  Yes, the first a few
+      outputs often contain immature routing information.
+    </p>
+ 
+<h4>Startup and termination:</h4>
+    <p>
+      It is possible that some hosts may start earlier than their neighbors.  As
+      a result, you might send the routing information to a neighbor which has not 
+      run yet.  You should not worry about this since your routing program at each
+      host will repeatedly send the routing information to its neighbors and a 
+      slow-starting neighbor will eventually get the information.
+    </p>
+
+    <p>
+      You program does not need to terminate.  It should keep running and outputing 
+      the routing information until being killed (<i>e.g.</i>, though Ctr-C).
+    </p>
+
+<h4>Link cost change:</h4>
+    <p>
+      Your implementation should also be able to handle link cost changes.  
+      In our test platform, link cost changes manifest as value updates in the 
+      neighbor link input files.  More specifically, to emulate the cost change of a link, the input 
+      files for the two nodes attached to the link should be updated.  During your 
+      testing, you might not be able to update the two files simultaneously.  But 
+      this is fine --- in practice the two attached nodes may not simultaneously 
+      detect a link cost change either.  Due to potential link cost change, your 
+      program at each host should re-read the link input file each time it is 
+      about to re-compute its distance vector and routing table (typically right 
+      before sending out the routing information to its neighbors).  Be aware of 
+      the potential file caching at the OS --- make sure you do read the new file 
+      content each time you re-read the file.
+    </p>
+
+    <p>
+      Note that you implementation only needs to support link cost changes, not 
+      network topology changes.
+    </p>
+<h3>Turn-in:</h3>
+    <p>
+      You are asked to turn in your source files, a Makefile, and a README 
+      file.  You should implement using C/C++ and be able to run on testbed.  Your program 
+      should take two parameters: the first parameter is the listening UDP port number and
+	  the second parameter is the input file that describes directly attached links) on startup.  
+	  I.e., we invoke your program like:
+<pre>
+	  $ ./dsdv 3033 a.dat
+</pre>
+      Different nodes will listen at different UDP ports for routing update.  
+      The README file should contain your student ID, name, e-mail address (within SJTU
+	  domain), and a description of your design and implementation 
+      strategies.  It should describe how to run your program (the exact parameter
+      format, etc.).  Please also provide a Makefile that builds your program from
+      submitted sources. The executable should be named as "dsdv".
+    </p>
+ 
+<pre>
+	$ turnin assignment2@network Makefile README dsdv.c[pp] ...
+</pre>
+    </p>
+ 
+<h3>Grading:</h3>
+<p>
+<ul>
+      <li>60%: a working program that correctly computes the shortest paths from
+	all-node startup and prints out the results in a reasonable time frame.</li>
+      <li>30%: correctly re-computes the shortest paths from link cost changes
+	and prints out the results in a reasonable time frame.</li>
+      <li>10%: a clear README file, clarity of your source code and completeness of 
+	your comments.</li>
+</ul>
+</p>
+
+  </body>
+ </html>

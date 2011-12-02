@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+	<link rel="stylesheet" type="text/css" href="/~jzhou/style.css" />
+  </head>
+ 
+  <body>
+    <h3>Assignment #3 - Reliable Data Transport Protocol</h3>
+    
+<h3>Assignment overview:</h3>
+    <p>
+      In this assignment, you will be implementing the sending and receiving side of a
+      reliable data transport (RDT) protocol.  Your protocol should achieve error-free,
+      loss-free, and in-order data delivery on top of a link medium that can lose, 
+      reorder, and corrupt packets.  Your implementation can follow any variation of 
+      the sliding window protocol, e.g., Go-Back-N, Selective Repeat, or the TCP rdt 
+      protocol.  Since we don't have machines with OS that we can modify, your 
+      implementation will run in a simulated environment.  This simulated environment 
+      is carefully constructed to follow the behavior of real systems.  This also means 
+      that your program should be written in the same programming language as the 
+      simulator -- <b>C/C++</b>.
+    </p>
+
+    <p>
+      <b>The routines you need to implement:</b> <br>
+      Only unidirectional transfer data is required in this assignment.  Of course,
+      the receiver may need to send back packets to acknowledge receipt of data.
+      The routines you need to implement are for the RDT layer at both the sending
+      and receiving side of a data transfer session.  These routines will be called
+      by the simulated environment when corresponding events occur.  The overall
+      structure of the environment is shown below:
+    </p>
+
+<img src="rdt.jpg" alt="RDT environment"/>
+
+    </p>
+      The unit of data passed between the upper layer and the RDT layer is the 
+      <i>message</i>, which is declared as:
+    <pre>
+struct message {
+    int size;
+    char *data;
+};
+    </pre>
+      <code>message.size</code> indicates the size of <code>message.data</code>
+      measured in bytes.  The reliable data transport protocol requires the data in the 
+      receiving node being delivered in order.  It does not, however, require the 
+      preservation of message boundaries.
+    </P>
+
+    <p>
+      The unit of data passed between the RDT layer and the lower layer is the
+      <i>packet</i>, which is declared as:
+    <pre>
+#define RDT_PKTSIZE 128
+struct packet {
+    char data[RDT_PKTSIZE];
+};
+    </pre>
+      This means that the lower layer always deliver packets in 128-byte chunks.
+      Therefore, fragmentation may be necessary if the message passed from the upper
+      layer is too big to fit into a packet.
+    </p>
+    
+    <p>
+      The routines you need to implement are detailed below.  Such routines in real-life
+      would be part of the operating system.
+      <ul>
+      <li>
+	<code>void Sender_Init();</code> - sender initialization, called once at the 
+	very beginning.  This routine is here to help you.  Leave it blank if you don't
+	need it.
+      </li>
+      <li>
+	<code>Sender_Final();</code> - sender finalization, called once at the very end.
+	This routine is here to help you.  Leave it blank if you don't need it.
+      </li>
+      <li>
+	<code>void Sender_FromUpperLayer(struct message*);</code> - called when a message
+	is passed from the upper layer at the sender.
+      </li>
+      <li>
+	<code>void Sender_FromLowerLayer(struct packet*);</code> - called when a packet 
+	is passed from the lower layer at the sender.
+      </li>
+      <li>
+	<code>void Sender_Timeout();</code> - called when the timer expires at the
+	sender.
+      </li>
+      <li>
+	<code>void Receiver_Init();</code> - receiver initialization, called once at the 
+	very beginning.  This routine is here to help you.  Leave it blank if you don't 
+	need it.
+      </li>
+      <li>
+	<code>void Receiver_Final();</code> - receiver finalization, called once at the 
+	very end.  This routine is here to help you.  Leave it blank if you don't need it.
+      </li>
+      <li>
+	<code>void Receiver_FromLowerLayer(struct packet *pkt);</code> - called when a 
+	packet is passed from the lower layer at the receiver.
+      </li>
+      </ul>
+    </p>
+
+    <p>
+      <b>The routines you can call (implemented by the simulated environment):</b> <br>
+      The routines you can call (implemented by the simulated environment) are detailed 
+      below.  Such routines in real-life would also be part of the operating system.
+      <ul>
+      <li>
+	<code>void Sender_StartTimer(double timeout);</code> - start the sender timer 
+	with a specified <code>timeout</code> (in seconds).  This timer is canceled when
+	<code>Sender_StopTimer()</code> is called or a new 
+	<code>Sender_StartTimer()</code> is called before the current timer expires.
+	<code>Sender_Timeout()</code> will be called when the timer expires.
+      </li>
+      <li>
+	<code>void Sender_StopTimer();</code> - stop the sender timer.
+      </li>
+      <li>
+	<code>bool Sender_isTimerSet();</code> - check whether the sender timer is being 
+	set, return true if the timer is set, return false otherwise.
+      </li>
+      <li>
+	<code>void Sender_ToLowerLayer(struct packet*);</code> - pass a packet to the 
+	lower layer at the sender for delivery.
+      </li>
+      <li>
+	<code>void Receiver_ToLowerLayer(struct packet*);</code> - pass a packet to
+	the lower layer at the receiver for delivery.
+	</code>
+      </li>
+      <li>
+	<code>void Receiver_ToUpperLayer(struct message*);</code> - deliver a message to 
+	the upper layer at the receiver.
+      </li>
+    </ul>
+    </p>
+
+    <p>
+      <b>The simulated network environment:</b> <br>
+      The overall structure of the environment is shown 
+      in the above figure.  There is one and only one timer 
+      available at the sender.  The underlying link medium can lose,
+      reorder, and corrupt packets.  The default one-way latency for this link is 100ms
+      when the link does not reorder the packets.  After you compile your code and my code
+      together and run the resulting program, you will be asked to specify the following 
+      parameters for the simulation environment.
+      <ul>
+      <li>
+	<code>sim_time</code> - total simulation time, the simulation will end at this 
+	time (in seconds).
+      </li>
+      <li>
+	<code>mean_msg_arrivalint</code> - average intervals between consecutive messages
+	passed from the upper layer at the sender (in seconds).  The actual interval
+	varies between zero and twice the average.
+      </li>
+      <li>
+	<code>mean_msg_size</code> - average size of messages (in bytes).  The actual size
+	varies between one and twice the average.
+      </li>
+      <li>
+	<code>outoforder_rate</code> - the probability that a packet is not delivered 
+	with the normal latency - 100ms.  A value of 0.1 means that one in ten packets 
+	are not delivered with the normal latency.  When this occurs, the latency varies
+	between zero and 200ms.
+      </li>
+      <li>
+	<code>loss_rate</code> - packet loss probability: a value of 0.1 means that one 
+	in ten packets are lost on average.
+      </li>
+      <li>
+	<code>corrupt_rate</code> - packet corruption probability: a value of 0.1 means 
+	that one in ten packets (excluding those lost) are corrupted on average.  Note 
+	that any part of a packet can be corrupted.
+      </li>
+      <li>
+	<code>tracing_level</code> - levels of trace printouts (higher level always 
+	prints out more information): a tracing level of 0 turns off all traces, a 
+	tracing level of 1 turns on regular traces, a tracing level of 2 prints out the 
+	delivered message.  Most likely you want to use level 1 for debugging and use
+	level 0 for final testing.
+      </li>
+    </ul>
+    </p>
+
+    <p>
+      <b>Helpful hints:</b> <br>
+      <ul>
+      <li>
+	<i>Timer</i> -- There is only one physical timer available at the sender.  In
+	some cases you might want to keep multiple timers simultaneously.  You can
+	simulate multiple virtual timers using a single physical timer.  The basic idea
+	is that you keep a chain of virtual timers ordered in their expiration time and
+	the physical timer will go off at the first virtual timer expiration.
+      </li>
+      <li>
+	<i>Timeout</i> -- The average oneway packet latency in the simulation is 0.1 second
+	(the latency of a particular packet may be higher than the average).  For the
+	round-trip timeout value for retransmission, I recommend you to set it at 0.3 
+	second.  I make no guarantee that this is the best timeout value.
+      </li>
+      <li>
+	<i>Window size</i> -- Too big a window size may affect the efficiency of Go-Back-N 
+	(it needs to retransmit the entire window at a timeout).  I recommend you to use
+	a window size of 10.  Again, I make no guarantee that this is the best setting.
+      </li>
+      <li>
+	<i>Data buffer at the sender</i> -- You may need extra data buffer at the 
+	sender in addition to the send window.  The reason is that the upper layer may 
+	wish to send data at a faster rate than the link capacity for a sustained period 
+	of time.  Without additional buffering, data may be lost when the send window is 
+	full and another message is passed from the upper layer at the sender.  This
+	buffer should be drained when slots in the send window become available.
+	<b><font color="ff0000">Note:</font></b> An alternative here is to
+	block the sending application if there is no free slot in the send window and the
+	application wants to send more.  This is not an option here due to the nature of
+	the simulator --- the blocking of any routine will block the whole simulator.
+      </li>
+      <li>
+	<i>Error detection and checksumming</i> -- You will need some kind of checksumming
+	to detect errors.  The Internet checksum 
+	is a good candidate here.  Remember that no checksumming can detect all errors 
+	but your checksum should have sufficient number of bits (e.g. 16 bit in Internet 
+	checksum) to make undetected errors very rare.  We can not guarantee completely 
+	error-free delivery because of checksumming's limitation.  But you should be 
+	convinced that this should happen very rarely with a good checksumming technique.
+      </li>
+      <li>
+	<i>Packet format</i> -- A key part of your design is the packet format.  The packet
+	will be split into a header part and a payload part.  Some common header fields
+	include payload size, sequence number, acknowledgment sequence number, and the
+	checksum.
+      </li>
+      <li>
+	<i>Random numbers</i> -- Keep in mind that many parts of the simulated 
+	environments are based on random numbers, including the message arrival intervals
+	and message sizes.  So two different runs with the same input parameters may not 
+	generate the same results.  
+      </ul>
+    </p>
+
+<h3>The simulation code and your turn-in:</h3> 
+    <p>
+      The simulation code includes 7 files and they can be found 
+      <a href="2/"><b>here</b></a>.  The simulator is in
+      C++ so your code should be in C/C++ to work with the simulator.  Your will need to
+      understand basic concepts about makefiles.  Come talk to me or the TA if not.
+      The RDT layer is implemented in <code>rdt_sender.cc</code> and <code>rdt_receiver.cc</code>.
+      The current implementation assumes there is no packet loss, corruption, or 
+      reordering in the underlying link medium.  You will need to enhance them to deal 
+      with all these situations.  In general, you are not supposed to change 
+      <code>rdt_receiver.h</code>, <code>rdt_sender.h</code>, <code>rdt_struct.h</code>, 
+      and <code>rdt_sim.cc</code>.  For debugging purpose, you may want to add more 
+      printouts in <code>rdt_sim.cc</code>.  If you do so, definitely remember to test 
+      your program with the original <code>rdt_sim.cc</code> before turn-in.
+    </p>
+
+    <p>
+      As you can see, the main complexity of the simulator is enclosed in 
+      <code>rdt_sim.cc</code>.  My intention is that you don't have to read and understand
+      this file to complete the assignment.  You can ask for my or TA's assistance if you need
+      to understand it for some reason.
+    </p>
+
+    <p>
+      <b>Turn-in:</b> <br>
+      You should turn in a README file, the new <code>rdt_sender.cc</code>,
+      <code>rdt_receiver.cc</code>, and any new source files you added for your
+      implementation.
+      If the default makefile doesn't work for you, you should also turn in a new
+      <code>makefile</code>.  <span class="emph">You should NOT turn in
+	<code>rdt_receiver.h</code>, <code>rdt_sender.h</code>, <code>rdt_struct.h</code>,
+      and <code>rdt_sim.cc</code> because we will use the original versions of those
+      files in grading.</span>  Make necessary explanation in your README file for your
+      turn-in.  
+
+<pre>
+	$ turnin assignment3@network rdt_sender.cc rdt_receiver.cc README ...
+</pre>
+
+    </p>
+
+    <p>
+      <b>Testing:</b> <br>
+      The original versions of all files <a href="2/"><b>here</b></a> should 
+      compile and run.  However, they only
+      work correctly when there is no packet loss, corruption, or reordering in the 
+      underlying link medium.  Run <code>rdt_sim 1000 0.1 100 0 0 0 0</code> to see what
+      happens. (Ruining <code>rdt_sim</code> without parameters will tell you the usage of this program.)
+      In summary, the following are a few test cases you may want to use.
+      <ul>
+      <li>
+	<code>rdt_sim 1000 0.1 100 0 0 0 0</code> - there is no packet loss, corruption, 
+	or reordering in the underlying link medium.
+      </li>
+      <li>
+	<code>rdt_sim 1000 0.1 100 0.02 0 0 0</code> - there is no packet loss or
+	corruption, but there is reordering in the underlying link medium.
+      </li>
+      <li>
+	<code>rdt_sim 1000 0.1 100 0 0.02 0 0</code> - there is no packet corruption or
+	reordering, but there is packet loss in the underlying link medium.
+      </li>
+      <li>
+	<code>rdt_sim 1000 0.1 100 0 0 0.02 0</code> - there is no packet loss or
+	reordering, but there is packet corruption in the underlying link medium.
+      </li>
+      <li>
+	<code>rdt_sim 1000 0.1 100 0.02 0.02 0.02 0</code> - there could be packet loss, 
+	corruption, or reordering in the underlying link medium.
+      </li>
+      </ul>
+      Of course, your goal is to make the last test case work.  Keep in mind that even if
+      your program works, it may still occasionally report errors due to the limitation
+      of checksumming.  Your program, however, should never report errors when there is
+      no packet corruption in the underlying link medium.  If your program works for some 
+      cases with parameters differing from the above examples, please specify these cases
+      in the README file to get partial credits.
+    </p>
+
+<h3>Grading:</h3>
+      <ul>
+      <li>40% each for error-free, loss-free, and in-order delivery of your RDT implementation.
+      </li>
+      <li>60% for efficiency.  There are two aspects of efficiency.  The primary efficiency
+	metric is measured by the number of packets your implementation needs to pass 
+	between the sender and receiver for each particular data transfer session.  The
+	secondary efficiency metric is the transmission throughput --- the maximum amount
+	of data that can be successfully transmitted within a time frame.  We are mostly 
+	interested in the primary efficiency metric.  We bring up the secondary metric to 
+	guard against a Stop-and-Wait protocol (which does not pass too many packets to 
+	complete a data transfer session, thus has very low throughput).  A reasonable 
+	implementation of Go-Back-N protocol should get you full credits on the
+	efficiency. 
+       <!--	We will award 10% extra credit for the student with the best 
+	efficiency (primary metric) and a reasonable throughput (that is, DO NOT turn in
+	a Stop-and-Wait protocol).
+	-->
+      </li>
+      </ul>
+
+  </body>
+</html>
