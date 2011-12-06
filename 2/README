@@ -1,12 +1,23 @@
 Description:
-This is a program which implements the DSDV routing protocol. It can be used to calculate the shortest path between two nodes as well as handle changes in the routing table (including the case a link is broken).
-This program is written in C programming language, and for Linux (or maybe other UNIX-like system). Also POSIX pthread is used in this program.
+This is a program which implements the DSDV routing protocol. It can be used to
+calculate the shortest path between two nodes as well as handle changes in the
+routing table (including the case a link is broken).
+This program is written in C programming language, and for Linux (or maybe
+other UNIX-like system). Also POSIX pthread is used in this program.
 
 Design:
-There are three threads in this program, one for sending messages, one for receiving messages and one for main program, which is responsible fot creating those two threads above.
-The sending thread (which runs in the send_updates function in dsdv.c) will check the files every two seconds and update the routing table of this node, transfer it into a piece of message and broadcast it. It will also increase the sequence number of this node every ten seconds.
-The receiving thread (which run in the recv_and_update function in dsdv.c) will always wait for messages from other nodes, and update the routing table once such a message received.
-Mutex lock is used in this program to make sure only one thread would update the routing table in one time.
+There are three threads in this program, one for sending messages, one for
+receiving messages and one for main program, which is responsible fot creating
+those two threads above.
+The sending thread (which runs in the send_updates function in dsdv.c) will
+check the files every two seconds and update the routing table of this node,
+transfer it into a piece of message and broadcast it. It will also increase the
+sequence number of this node every ten seconds.
+The receiving thread (which run in the recv_and_update function in dsdv.c) will
+always wait for messages from other nodes, and update the routing table once
+such a message received.
+Mutex lock is used in this program to make sure only one thread would update
+the routing table in one time.
 
 ========== Author ==========
 ID:	5090379133

@@ -9,14 +9,6 @@
  *
  *  This is a program written for my network assignemnt.
  *  Socket and pthread and many other stuff are used in this program.
- *
- *  You may notice that there's many #ifdef DEBUG in this program.
- *  These are written for convenience of debugging.
- *  For example, if there is something wrong when running this program,
- *  one can just add a #define DEBUG in the head of this file, and
- *  it would print plenty of information on the screen while running.
- *  One can easily locate the wrong part by using this information
- *  without any debug tools.
  */
 
 #include <stdio.h>
@@ -72,9 +64,6 @@ void init_node(NODE* node) {
  */
 void maintain_node(NODE* node) {
 	int i;
-#ifdef DEBUG
-	printf("start maintain_node.\n");
-#endif
 	for (i = 0; i < node->num_neighbors; i++) {
 		if (node->next_hop[i] == node->names[i]) {
 			node->dist[i] = node->edge[i];
@@ -90,9 +79,6 @@ void maintain_node(NODE* node) {
 			node->flags[i] = 0;
 		}
 	}
-#ifdef DEBUG
-	printf("end maintain_node.\n");
-#endif
 }
 
 /*
@@ -130,9 +116,6 @@ void check_updates() {
 	double tmpd;
 	char tmpc;
 	char tmps[MAX_NAME_LEN];
-#ifdef DEBUG
-	printf("start to read file\n");
-#endif
 	file = fopen(filename, "r");
 	fscanf(file, "%d %c\n", &tmpi, &tmpc);
 	for (i = 0; i < node.num_neighbors; i++) {
@@ -151,9 +134,6 @@ void check_updates() {
 		}
 	}
 	fclose(file);
-#ifdef DEBUG
-	printf("end reading file\n");
-#endif
 	maintain_node(&node);
 }
 
@@ -170,9 +150,6 @@ void translate_and_update(char* msg) {
 
 	init_node(&another_node);
 	msg_to_node(msg, &another_node);
-#ifdef DEBUG
-	printf("Msg from %c\n", another_node.name);
-#endif
 	// Locate the number of the node received in current routing table.
 	for (k = 0; k < node.num_neighbors; k++) {
 		if (node.names[k] == another_node.name)
@@ -213,9 +190,6 @@ void translate_and_update(char* msg) {
 				break;
 			}
 		}
-#ifdef DEBUG
-		printf("name%d: %c\n", i, another_node.names[i]);
-#endif
 		// If a reachable destination is not in current routing table.
 		if (!flag) {
 			node.dist[node.num_des] = node.edge[k] + another_node.dist[i];
@@ -250,30 +224,18 @@ void* recv_and_update(void* t) {
 	addr.sin_addr.s_addr = htonl( INADDR_ANY );
 
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, len);
-#ifdef DEBUG
-	printf("start binding.\n");
-#endif
 	if (bind(sockfd, (struct sockaddr*)&addr, sizeof(addr))) {
 		printf("Failed to bind socket on thread %d.\n", tid);
 		exit(-1);
 	}
-#ifdef DEBUG
-	printf("binding finished.\n");
-#endif
 
 	// Receive and update. This loop is supposed to run forever.
 	while (1) {
-#ifdef DEBUG
-		printf("start recv()\n");
-#endif
 		if ((numbytes = recv(sockfd, buf, BUFLEN, 0)) < 0) {
 			printf("Failed to receive msgs on thread %d.\n",
 					tid);
 			exit(-1);
 		}
-#ifdef DEBUG
-		printf("end recv(), numbytes=%d\n", numbytes);
-#endif
 		buf[numbytes] = '\0';
 		pthread_mutex_lock(&mutex);
 		translate_and_update(buf);
@@ -322,14 +284,8 @@ void* send_updates(void* t) {
 		j++;
 		pthread_mutex_lock(&mutex);
 		check_updates();
-#ifdef DEBUG
-		printf("start node_to_msg\n");
-#endif
 		// Transfer the information of this node to a string.
 		node_to_msg(&node, buf);
-#ifdef DEBUG
-		printf("end node_to_msg\n");
-#endif
 		// Print the current routing table.
 		printf("## print-out number %d\n", ++print_out_number);
 		for (i = 0; i < node.num_des; i++) {
@@ -341,9 +297,6 @@ void* send_updates(void* t) {
 		}
 		pthread_mutex_unlock(&mutex);
 
-#ifdef DEBUG
-		printf("start to send msgs\n");
-#endif
 		// Broadcase the information of this node.
 		for (i = 0; i < node.num_neighbors; i++) {
 			if (0 > node.edge[i])
@@ -356,15 +309,9 @@ void* send_updates(void* t) {
 				exit(-1);
 			}
 		}
-#ifdef DEBUG
-		printf("msg sent\n");
-#endif
 
 		// This thread would sleep for 2 seconds.
 		sleep(2);
-#ifdef DEBUG
-		printf("sleep over\n");
-#endif
 
 		pthread_mutex_lock(&mutex);
 		// Sequence change only happens every 10 seconds.
